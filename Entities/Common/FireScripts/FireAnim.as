@@ -59,30 +59,6 @@ CParticle@ MakeFireLightParticle(CBlob@ blob)
 	return @p;
 }
 
-CParticle@ MakeFirePixelParticle(CBlob@ blob)
-{
-	Random r;
-
-	CParticle@ p = ParticlePixel(
-		blob.getPosition() + getRandomVelocity(0, blob.getRadius(), 360.0f),
-		Vec2f(0.0f, -1.5f) + Vec2f(blob.getVelocity().x * 0.2f, blob.getVelocity().y * 0.2f) + getRandomVelocity(0, 0.1f, 360.0f),
-		SColor(255, 255, 50 + XORRandom(120), 0),
-		true);
-
-	if (p is null) { return null; }
-
-	p.gravity = Vec2f_zero;
-	p.timeout = 40;
-	p.deadeffect = -1;
-	p.diesonanimate = false;
-	p.mass = 1.0f;
-	p.collides = true;
-	p.fadeout = true;
-	p.fadeoutmod = 0.97f;
-
-	return @p;
-}
-
 void onTick(CSprite@ this)
 {
 	this.getCurrentScript().tickFrequency = 24; // opt
@@ -111,11 +87,6 @@ void onTick(CSprite@ this)
 			{
 				MakeFireLightParticle(@blob);
 			}
-
-			/*if (XORRandom(3) == 0)
-			{
-				MakeFirePixelParticle(@blob);
-			}*/
 		}
 		else
 		{

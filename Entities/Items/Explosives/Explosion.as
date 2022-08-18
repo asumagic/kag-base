@@ -32,6 +32,36 @@ bool isOwnerBlob(CBlob@ this, CBlob@ that)
 	return (that.getNetworkID() == this.get_u16("explosive_parent"));
 }
 
+CParticle@ MakeExplosionLightParticle(Vec2f position, Vec2f extra_velocity_impulse = Vec2f_zero)
+{
+	Random r(XORRandom(9999));
+
+	CParticle@ p = ParticleAnimated(
+		"light.png",
+		position,
+		getRandomVelocity(0, r.NextFloat() * 1.0f, 360.0f) + extra_velocity_impulse,
+		0.0f,
+		0.3f + r.NextFloat() * 0.1f,
+		0,
+		0,
+		Vec2f(256, 256),
+		0,
+		0.0f,
+		false);
+
+	if (p is null) { return null; }
+
+	p.timeout = 30;
+	p.deadeffect = -1;
+	p.diesonanimate = false;
+	p.colour = SColor(255, 255, 170, 0);
+	p.fadeout = true;
+	p.fadeoutmod = 0.85f + r.NextFloat() * 0.075f;
+	p.setRenderStyle(RenderStyle::light, false, true);
+
+	return @p;
+}
+
 void makeSmallExplosionParticle(Vec2f pos)
 {
 	ParticleAnimated("Entities/Effects/Sprites/SmallExplosion" + (XORRandom(3) + 1) + ".png",
@@ -46,6 +76,8 @@ void makeLargeExplosionParticle(Vec2f pos)
 	                 pos, Vec2f(0, 0.5f), 0.0f, 1.0f,
 	                 3 + XORRandom(3),
 	                 -0.1f, true);
+
+
 }
 
 void Explode(CBlob@ this, f32 radius, f32 damage)
@@ -128,10 +160,15 @@ void Explode(CBlob@ this, f32 radius, f32 damage)
 		return;
 	}
 
-	//
-
 	makeLargeExplosionParticle(pos);
 
+	if (!bomberman)
+	{
+		for (int i = 0; i < 5; ++i)
+		{
+			MakeExplosionLightParticle(pos + getRandomVelocity(0, 20.0f, 360.0f), getRandomVelocity(0, 1.0f, 360.0f));
+		}
+	}
 
 	if (bomberman)
 	{
@@ -353,7 +390,15 @@ void LinearExplosion(CBlob@ this, Vec2f _direction, f32 length, const f32 width,
 			bool justhurt = laststep || (width_step == 0 || width_step == width_steps + 1);
 			tpos += normal;
 
-			if (!justhurt && (((step + width_step) % 3 == 0) || XORRandom(3) == 0)) makeSmallExplosionParticle(tpos);
+			if (!justhurt && (((step + width_step) % 3 == 0) || XORRandom(3) == 0))
+			{
+				makeSmallExplosionParticle(tpos);
+			}
+
+			if (XORRandom(10) == 0)
+			{
+				MakeExplosionLightParticle(tpos + getRandomVelocity(0, 5.0f, 360.0f), direction * (1.5f / 8.0f));
+			}
 
 			if (isserver)
 			{
